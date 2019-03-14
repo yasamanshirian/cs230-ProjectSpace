@@ -7,7 +7,7 @@ from keras.optimizers import SGD
 import numpy as np
 from keras.utils import np_utils
 from math import floor
-from music_tagger_ftuning import music_tagger_6cnv1gru
+from music_tagger_ftuning import music_tagger_wrapper
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 from utils import save_data, load_dataset, save_dataset, sort_result, predict_label, load_gt, plot_confusion_matrix, extract_melgrams
@@ -38,13 +38,13 @@ LOAD_WEIGHTS = 1
 
 # Dataset
 MULTIFRAMES = 0
-SAVE_DB = 0
-LOAD_DB = 1
+SAVE_DB = 1
+LOAD_DB = 0
 
 # Model parameters
 nb_classes = 7
-nb_epoch = 100
-batch_size = 1
+nb_epoch = 50
+batch_size = 128
 
 time_elapsed = 0
 
@@ -55,7 +55,7 @@ tags = np.array(tags)
 
 # Paths to set
 model_name = "sgd"
-model_path = "sgdtrained/" + model_name + "/"
+model_path = "sgd_trained/" + model_name + "/"
 weights_path = "sgd_trained/" + model_name + "/weights/"
 
 
@@ -74,14 +74,14 @@ if not os.path.exists(weights_path):
 # Divide the song into multiple frames of 29.1s or center crop
 # train_songs_list = "music/train_FMA/train_FMA_list_shuffled.txt"
 # train_songs_tags = "music/train_FMA/train_FMA_labels_shuffled.txt"
-train_songs_list = "train_FMA_one.txt"
-train_songs_tags = "train_FMA_labels_one.txt"
+train_songs_list = "lists/train_FMA_list_shuffled.txt"
+train_songs_tags = "lists/train_FMA_labels_shuffled.txt"
 
 
 
 # Data Loading
 if LOAD_DB:
-    X_train, y_train,num_frames_train = load_dataset('music_dataset/music_dataset_FMA.h5')
+    X_train, y_train,num_frames_train = load_dataset('music_dataset_spectogram/train/music_dataset_FMA.h5')
 
 # Compute mel-spectogram for all the frames
 else:
@@ -90,22 +90,22 @@ else:
     print('X_train shape:', X_train.shape)
 #     X_test, y_test, num_frames_test = extract_melgrams(test_songs_list, MULTIFRAMES, process_all_song=False, num_songs_genre=10)
 
-y_train  = open(train_songs_tags, 'r').read().splitlines()
+y_train  = np.loadtxt(train_songs_tags,dtype=int)
 
 
 print(X_train.shape, 'train samples')
 # print(X_test.shape, 'test samples')
 
 
-y_train = np.array(y_train)
+#y_train = np.array(y_train)
 # y_test = np.array(y_test)
 
 if SAVE_DB:
     if MULTIFRAMES:
-        save_dataset('music_dataset/music_dataset_multiframe_train.h5', X_train, y_train,num_frames_train)
+        save_dataset('music_dataset_spectogram/train/music_dataset_multiframe_train.h5', X_train, y_train,num_frames_train)
         # save_dataset('music_dataset/music_dataset_multiframe_test.h5', X_test,y_test,num_frames_test)
     else:
-        save_dataset('music_dataset/music_dataset_FMA.h5', X_train,y_train ,0)
+        save_dataset('music_dataset_spectogram/train/music_dataset_FMA.h5', X_train,y_train ,0)
 
 Y_train = np_utils.to_categorical(y_train, nb_classes)
 # Y_test = np_utils.to_categorical(y_test, nb_classes)

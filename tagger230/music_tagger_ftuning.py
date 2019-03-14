@@ -36,7 +36,7 @@ def music_tagger_wrapper(load_weights):
 
 
     if load_weights:
-        model.load_weights('pre_trained/weights/crnn_net_gru_adam_epoch_40.h5', by_name=True)
+        model.load_weights('pre_trained/weights/pre_trained_crnn_net_gru_adam_epoch_40.h5', by_name=True)
 
 
     #popping 2 GRU layers + softmax layer to add 2 extra Convd layers 
